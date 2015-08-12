@@ -38,7 +38,7 @@ call unite#util#set_default('g:unite_source_rec_unit',
 " -L follows symbolic links to have the same behaviour as file_rec
 call unite#util#set_default(
       \ 'g:unite_source_rec_async_command', (
-      \  !unite#util#is_windows() && executable('find') ? 'find -L' : ''),
+      \  !unite#util#is_windows() && executable('find') ? ['find','-L'] : ''),
       \ 'g:unite_source_file_rec_async_command')
 call unite#util#set_default(
       \ 'g:unite_source_rec_find_args',
@@ -279,10 +279,10 @@ function! s:source_file_async.gather_candidates(args, context) "{{{
   let command = g:unite_source_rec_async_command
   if a:context.source__is_directory
     " Use find command.
-    let command = 'find -L'
+    let command = ['find','-L']
   endif
 
-  let args = vimproc#parser#split_args(command)
+  let args = command
   if empty(args) || !executable(args[0])
     if empty(args)
       call unite#print_source_message(
@@ -448,10 +448,10 @@ function! s:source_file_neovim.gather_candidates(args, context) "{{{
   let command = g:unite_source_rec_async_command
   if a:context.source__is_directory
     " Use find command.
-    let command = 'find -L'
+    let command = ['find,'-L']
   endif
 
-  let args = split(command)
+  let args = command
   if empty(args) || !executable(args[0])
     if empty(args)
       call unite#print_source_message(
@@ -474,9 +474,6 @@ function! s:source_file_neovim.gather_candidates(args, context) "{{{
           \ ['-o', '-type',
           \ (a:context.source__is_directory ? 'd' : 'f'), '-print']
   endif
-
-  " Use &shell and &shellcmdflag
-  let commands = [&shell, &shellcmdflag, join(commands, ' ')]
 
   " Note: "pt" needs pty.
   let a:context.source__job = jobstart(commands, {
